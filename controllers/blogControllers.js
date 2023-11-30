@@ -74,7 +74,7 @@ export const deleteBlog = async (req, res) => {
 
 
 export const getAllBlogs = async (req, res) => {
-    const blogs = await Blog.find(); 
+    const blogs = await Blog.find();
 
     if (!blogs) return res.status(404).json({
         success: false,
@@ -91,7 +91,7 @@ export const getAllBlogs = async (req, res) => {
 
 export const getBlogById = async (req, res) => {
     const id = req.params.id;
-    const blog = await Blog.findById(id); 
+    const blog = await Blog.findById(id);
 
     if (!blog) return res.status(404).json({
         success: false,
@@ -101,11 +101,8 @@ export const getBlogById = async (req, res) => {
     res.json({
         success: true,
         message: "Your blogs",
-        data : blog
+        data: blog
     })
 }
 
 
-export const getUserById = async (req, res) => {
-    
-}
