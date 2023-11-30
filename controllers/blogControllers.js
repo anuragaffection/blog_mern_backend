@@ -1,8 +1,6 @@
-
 import { Blog } from "../models/blogsModel.js";
 
 export const createBlog = async (req, res) => {
-
     const { title, description, imgUrl } = req.body;
 
     const blog = await Blog.create({
@@ -21,7 +19,6 @@ export const createBlog = async (req, res) => {
 
 
 export const myBlogs = async (req, res) => {
-   
     const userId = req.user._id;  // _id = coming from mongodb _id 
 
     // find 
@@ -38,9 +35,7 @@ export const myBlogs = async (req, res) => {
 
 export const updateBlog = async (req, res) => {
     const { title, description, imgUrl } = req.body;
-
     const id = req.params.id; // taking id from frontend 
-
     const blog = await Blog.findById(id);
 
     if (!blog) return res.status(404).json({
@@ -61,9 +56,7 @@ export const updateBlog = async (req, res) => {
 
 
 export const deleteBlog = async (req, res) => {
-
     const id = req.params.id;
-
     const blog = await Blog.findById(id); // a single blog matching the id 
 
     if (!blog) return res.status(404).json({
@@ -77,4 +70,42 @@ export const deleteBlog = async (req, res) => {
         success: true,
         message: "Blog Deleted"
     })
+}
+
+
+export const getAllBlogs = async (req, res) => {
+    const blogs = await Blog.find(); 
+
+    if (!blogs) return res.status(404).json({
+        success: false,
+        message: "There is no blogs in our db "
+    })
+
+    res.json({
+        success: true,
+        message: "All blogs are here ",
+        data: blogs
+    })
+}
+
+
+export const getBlogById = async (req, res) => {
+    const id = req.params.id;
+    const blog = await Blog.findById(id); 
+
+    if (!blog) return res.status(404).json({
+        success: false,
+        message: "Invalid id"
+    })
+
+    res.json({
+        success: true,
+        message: "Your blogs",
+        data : blog
+    })
+}
+
+
+export const getUserById = async (req, res) => {
+    
 }

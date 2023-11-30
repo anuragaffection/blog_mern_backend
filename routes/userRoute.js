@@ -1,5 +1,5 @@
 import Express from "express";
-import { userRegister, userLogin, userLogout, getMyProfile } from "../controllers/userControllers.js";
+import { userRegister, userLogin, userLogout, getMyProfile, getUserById } from "../controllers/userControllers.js";
 import { isAuthenticated } from "../middleware/auth.js";
 
 
@@ -19,6 +19,7 @@ router.post('/register', userRegister);
 router.post('/login', userLogin);
 router.get('/logout', userLogout);
 router.get('/getMyProfile', isAuthenticated, getMyProfile);
+router.get('/:id', getUserById)
 
 
 export default router;

@@ -71,3 +71,20 @@ export const getMyProfile = async (req, res) => {
         user: req.user
     })
 }
+
+
+export const getUserById = async (req, res) => {
+    const id = req.params.id;
+    const user = await User.findById(id);
+
+    if (!user) return res.status(404).json({
+        success: false,
+        message: "Invalid id, user does not exist "
+    })
+
+    res.json({
+        success: true,
+        message: "This  is the data of user ",
+        data: user
+    })
+}

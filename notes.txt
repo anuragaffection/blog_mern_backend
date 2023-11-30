@@ -17,10 +17,15 @@ Steps
 14. delete myblog api [with testing]
 15. deployment setup 
 16. deploy to render 
-17. frontend with react.js 
+17. getAllBlogs api [with testing]
+18. getUser by id  [with testing]
+19. getblogs by id [with testing]
+20. frontend with react.js 
+
 
 
 #2.47.00
+#3.43.08
 
 
 Topics {
