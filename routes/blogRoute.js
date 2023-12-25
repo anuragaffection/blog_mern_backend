@@ -9,7 +9,7 @@ router.get('/myBlogs', isAuthenticated, myBlogs);
 router.put('/:id', isAuthenticated, updateBlog);
 router.delete('/:id', isAuthenticated, deleteBlog);
 router.get('/allBlogs', getAllBlogs);
-router.get('/blog/:id',isAuthenticated, getBlogById);
+router.get('/blog/:id',isAuthenticated, getBlogById); // working if authenticated 
 
 
 export default router;
