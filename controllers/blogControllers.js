@@ -36,7 +36,7 @@ export const myBlogs = async (req, res) => {
 export const updateBlog = async (req, res) => {
     const { title, description, imgUrl } = req.body;
     const id = req.params.id; // taking id from frontend 
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findById(id); // Blog = finding in monogdb 
 
     if (!blog) return res.status(404).json({
         success: false,
@@ -46,6 +46,7 @@ export const updateBlog = async (req, res) => {
     blog.title = title;
     blog.description = description;
     blog.imgUrl = imgUrl;
+    blog.save();
 
     res.json({
         success: true,
