@@ -24,6 +24,16 @@ app.use(cors({
 app.use('/api/users', userRouter); // routing 
 app.use('/api/blogs', blogRouter); // routing 
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: "OK",
+        message: "Server is running and healthy",
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 const port = process.env.PORT; 
 app.listen(port, () => console.log(`Server is running on port ${port}`));
 
