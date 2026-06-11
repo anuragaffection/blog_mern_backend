@@ -210,19 +210,21 @@ The env keys the backend needs (`.env.example`):
 
 ### Going for option B 
 - go the aws secret manager
+- check our regsion - it must `ap-south-1` same as our ecs & load balancers 
 - Secret type : other type of secret
-- put key value  (our env )
+- put the value in key value in a single secret - `master/blog/backend`
+- 
 
 
 Add individually
 Add environment variables using plain text values or secrets from AWS Secrets Manager or Parameter Store.
 
 This means ECS will inject these as environment variables into your container
-FRONTEND_URL=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/FRONTEND_URL-13LPux>
-MONGODB_URL=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/MONGODB_URL-R61hWT>
-NODE_ENV=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/NODE_ENV-RMkBa1>
-PORT=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/PORT-7pqHBJ>
-TOKEN=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/TOKEN-o1P06T>
+FRONTEND_URL=<value from Secrets Manager> <arn:aws:secretsmanager:ap-south-1:129494056630:secret:master/blog/backend-VxzXt5:FRONTEND_URL::>
+MONGODB_URL=<value from Secrets Manager> <arn:aws:secretsmanager:ap-south-1:129494056630:secret:master/blog/backend-VxzXt5:MONGODB_URL::>
+NODE_ENV=<value from Secrets Manager> <arn:aws:secretsmanager:ap-south-1:129494056630:secret:master/blog/backend-VxzXt5:NODE_ENV::>
+PORT=<value from Secrets Manager> <arn:aws:secretsmanager:ap-south-1:129494056630:secret:master/blog/backend-VxzXt5:PORT::>
+TOKEN=<value from Secrets Manager> <arn:aws:secretsmanager:ap-south-1:129494056630:secret:master/blog/backend-VxzXt5:TOKEN::>
 
 Node.js application you can access them normally:
 process.env.FRONTEND_URL
@@ -715,3 +717,9 @@ Then `https://api.articleapp.<companyname>.in` works through **Cloudflare → AL
 | ECS service           | `blog-frontend-service` | `blog-backend-service`   |
 | Env injection         | build-time (public)     | runtime via task def (secret) |
 | Domain                | `articleapp.<company>.in` | `api.articleapp.<company>.in` |
+
+
+## 20. Test the backend env thorugh task definition is working on not
+- for temporarily pass the frontend url as localhost:5173
+- now, run the frontend in local & test
+-

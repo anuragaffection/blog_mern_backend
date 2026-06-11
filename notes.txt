@@ -48,3 +48,92 @@ render
 -- environment frontend url , do not put / in last of url 
 -- 
 
+
+
+
+     
+  It comes from your auth middleware,
+  blog_mern_backend/middleware/auth.js:8:
+
+  const { token } = req.cookies;
+  if (!token) return res.status(404).json({
+      success: false,
+      message: 'Token Not Found, Please Login'
+  })
+
+  It's a 404 the backend returns whenever the request arrives
+  without a token cookie. The request reached your server fine —
+  the server just didn't find a token cookie attached to it. So
+  this is purely "the browser did not send the token cookie."
+
+  Why it's happening (most likely causes, in order)
+
+  1. The cookie expired — most common. In utils/feature.js:9 the
+  cookie is set with:
+  maxAge: 10 * 60 * 1000,   // 10 minutes only
+  After 10 minutes the browser deletes it and every protected
+  request fails with this exact message. If it works right after
+  login and breaks shortly after, this is it.
+
+  2. NODE_ENV string mismatch. Look carefully at feature.js:10-11:
+  sameSite : process.env.NODE_ENV === "Development" ? "lax" :
+  "none",
+  secure   : process.env.NODE_ENV === "Development" ? false : true
+  The check is the exact string "Development" (capital D). If your
+  .env says development, production, or NODE_ENV is unset, you fall
+  into the else branch → sameSite: "none" + secure: true. A secure
+  cookie is only stored/sent over HTTPS. So if you're testing on
+  http://localhost, the browser silently drops the cookie and the
+  next request has no token → this error.
+
+  3. Cross-site cookie requirements not all met in production. For
+  sameSite: "none"; secure: true to actually work, you need all of:
+  - Both frontend and backend served over HTTPS ✓ required
+  - Frontend request has withCredentials: true — you have this ✓
+  - Backend CORS has credentials: true and a specific origin (not
+  *) — you have this in server.js:18-22 ✓
+  - process.env.FRONTEND_URL must exactly match the browser's
+  origin (scheme + host, no trailing slash)
+
+  If frontend and backend are on different domains and either is on
+  HTTP, the cookie won't be sent.
+
+  How to check what's actually in the cookies
+
+  Open the browser DevTools:
+
+  1. Application tab → Storage → Cookies → select your backend
+  domain. Look for a cookie named token. If it's missing or shows
+  an expired date, that's your answer.
+  2. Network tab → click the failing request (e.g. getmyprofile) →
+  Request Headers → look for a Cookie: header. If there's no
+  Cookie: token=..., the browser isn't sending it.
+  3. On the login request, check the Response Headers for
+  Set-Cookie:. If the browser refuses to store it, Chrome shows a
+  yellow ⚠️  on that request explaining why (e.g. "this Set-Cookie
+  was blocked because it had Secure but was not received over a
+  secure connection").
+
+  Note: because the cookie is httpOnly: true, you cannot see it via
+  document.cookie in the JS console — that's expected, not the
+  bug.
+
+  What you're passing in cookies
+
+  Just one cookie, named token, which is a JWT signed in
+  feature.js:5:
+  const token = Jwt.sign({ _id: user._id }, process.env.TOKEN);
+  So the payload is just the user's _id. The middleware verifies it
+  with process.env.TOKEN and loads req.user.
+  req.user.
+
+  Quick fixes
+
+  - For local dev: make sure your .env has NODE_ENV=Development (exact capital D), then test over
+  http://localhost. That gives you sameSite: lax + secure: false, which works on HTTP.
+  - Bump the 10-minute expiry if sessions are dying too fast.
+  - For production: confirm both sites are HTTPS and FRONTEND_URL exactly matches your deployed frontend
+  origin.
+
+  Want me to make the NODE_ENV check more robust (e.g. case-insensitive, or default-to-dev) so this stops
+  biting you?
