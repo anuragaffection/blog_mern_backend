@@ -28,7 +28,7 @@ app.use('/api/blogs', blogRouter); // routing
 app.get('/health', (req, res) => {
     res.status(200).json({
         status: "OK",
-        message: "Server is running and healthy",
+        message: "Server is running and healthy : Blog Backend",
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });
