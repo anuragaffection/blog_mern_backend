@@ -208,6 +208,29 @@ The env keys the backend needs (`.env.example`):
 
 > This doc uses **Option A** in the task-definition JSON below for clarity. For production, migrate `MONGODB_URL` and `TOKEN` to Option B.
 
+### Going for option B 
+- go the aws secret manager
+- Secret type : other type of secret
+- put key value  (our env )
+
+
+Add individually
+Add environment variables using plain text values or secrets from AWS Secrets Manager or Parameter Store.
+
+This means ECS will inject these as environment variables into your container
+FRONTEND_URL=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/FRONTEND_URL-13LPux>
+MONGODB_URL=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/MONGODB_URL-R61hWT>
+NODE_ENV=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/NODE_ENV-RMkBa1>
+PORT=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/PORT-7pqHBJ>
+TOKEN=<value from Secrets Manager> <arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/TOKEN-o1P06T>
+
+Node.js application you can access them normally:
+process.env.FRONTEND_URL
+process.env.MONGODB_URL
+process.env.NODE_ENV
+process.env.PORT
+process.env.TOKEN
+
 ## 10. Set Up ECS — REUSE existing cluster
 
 The cluster already exists from the frontend. **Do not create a new one.**
@@ -243,16 +266,34 @@ Add each key from step 9 under the container's **Environment variables** section
 - **CPU:** `0.5 vCPU`
 - **Memory:** `1 GB`
 
+
+### Attaching more permission to the task execution role
+
+What should be attached?
+
+For a quick test, attach AWS-managed policy:
+
+SecretsManagerReadWrite
+
+to:
+
+ecsTaskExecutionRole
+
+IAM → Roles → ecsTaskExecutionRole → Add Permissions
+
+This is broader than needed, but good for debugging.
+
 ## 12. Task Definition JSON
 
 After the first create, you can revise it. Note the `environment` array (Option A) — for production move `MONGODB_URL` / `TOKEN` into a `secrets` array (Option B).
 
 ```json
 {
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:129494056630:task-definition/blog-backend-td:2",
     "containerDefinitions": [
         {
             "name": "blog-backend",
-            "image": "129494056630.dkr.ecr.ap-south-1.amazonaws.com/blog-mern-backend:latest",
+            "image": "129494056630.dkr.ecr.ap-south-1.amazonaws.com/blog-mern-backend:9b60953",
             "cpu": 512,
             "memory": 1024,
             "portMappings": [
@@ -265,16 +306,32 @@ After the first create, you can revise it. Note the `environment` array (Option 
                 }
             ],
             "essential": true,
-            "environment": [
-                { "name": "NODE_ENV", "value": "production" },
-                { "name": "PORT", "value": "3000" },
-                { "name": "FRONTEND_URL", "value": "https://articleapp.<companyname>.in" },
-                { "name": "MONGODB_URL", "value": "<your-mongodb-atlas-uri>" },
-                { "name": "TOKEN", "value": "<your-jwt-secret>" }
-            ],
+            "environment": [],
             "environmentFiles": [],
             "mountPoints": [],
             "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "FRONTEND_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/FRONTEND_URL-13LPux"
+                },
+                {
+                    "name": "MONGODB_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/MONGODB_URL-R61hWT"
+                },
+                {
+                    "name": "NODE_ENV",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/NODE_ENV-RMkBa1"
+                },
+                {
+                    "name": "PORT",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/PORT-7pqHBJ"
+                },
+                {
+                    "name": "TOKEN",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:129494056630:secret:master/backend/TOKEN-o1P06T"
+                }
+            ],
             "ulimits": [],
             "logConfiguration": {
                 "logDriver": "awslogs",
@@ -292,27 +349,60 @@ After the first create, you can revise it. Note the `environment` array (Option 
     "family": "blog-backend-td",
     "executionRoleArn": "arn:aws:iam::129494056630:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
+    "revision": 2,
     "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "ecs.capability.secrets.asm.environment-variables"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+        }
+    ],
     "placementConstraints": [],
-    "requiresCompatibilities": [
-        "FARGATE"
+    "compatibilities": [
+        "EC2",
+        "FARGATE",
+        "MANAGED_INSTANCES"
     ],
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
     "cpu": "512",
-    "memory": "1024"
+    "memory": "1024",
+    "registeredAt": "2026-06-11T04:19:35.522Z",
+    "registeredBy": "arn:aws:iam::129494056630:root",
+    "enableFaultInjection": false,
+    "tags": []
 }
 ```
 
-> **Production (Option B) instead of `environment`:**
-> ```json
-> "secrets": [
->     { "name": "MONGODB_URL", "valueFrom": "arn:aws:secretsmanager:ap-south-1:129494056630:secret:blog/backend/MONGODB_URL" },
->     { "name": "TOKEN",       "valueFrom": "arn:aws:secretsmanager:ap-south-1:129494056630:secret:blog/backend/TOKEN" }
-> ]
-> ```
 
 ## 13. Create Target Group
 
@@ -427,6 +517,10 @@ Before creating the service, you must have these:
 
 - Use an existing load balancer (`blog-backend-alb`).
 - Use an existing listener (HTTP : 80) → forward to `blog-backend-tg`.
+
+### Target group 
+- use an existing target group (`blog-backend-tg`).
+- 
 
 ## ✅ AWS Configuration Complete
 
