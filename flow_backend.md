@@ -213,7 +213,9 @@ The env keys the backend needs (`.env.example`):
 - check our regsion - it must `ap-south-1` same as our ecs & load balancers 
 - Secret type : other type of secret
 - put the value in key value in a single secret - `master/blog/backend`
-- 
+- to update or edit secret manager - `Retrieve secret value -> edit`
+- after editing the secret - `re deploy the services` 
+
 
 
 Add individually
@@ -500,6 +502,7 @@ Before creating the service, you must have these:
 
 - **VPC:** `default`
 - **Subnets:** `default`
+- 
 
 ### Security Group — `blog-backend-sg-ecs`
 
@@ -523,6 +526,39 @@ Before creating the service, you must have these:
 ### Target group 
 - use an existing target group (`blog-backend-tg`).
 - 
+
+
+
+### Service Auto Scaling 
+- policy name - `blog-backend-target-scaling`
+- desired number of task - 1
+- minimum number of task - 0
+- maximum number of task - 1
+- set the scaling polices
+
+### scaling polices
+- For 90% of applications, including your MERN blog, SaaS, Shopify app backend, etc., use Target Tracking.
+- After adding a task, ECS waits before adding another. : scale out cooldown 
+- After removing a task, ECS waits before removing another.
+
+Min Tasks: 1 
+Desired Tasks: 1
+Max Tasks: 5
+
+Policy Type:
+Target Tracking
+
+Metric:
+ECSServiceAverageCPUUtilization
+
+Target Value:
+60
+
+Scale-Out Cooldown:
+60 seconds
+
+Scale-In Cooldown:
+300 seconds
 
 ## ✅ AWS Configuration Complete
 
