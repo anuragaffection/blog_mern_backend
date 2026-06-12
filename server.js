@@ -28,7 +28,7 @@ app.use('/api/blogs', blogRouter); // routing
 app.get('/health', (req, res) => {
     res.status(200).json({
         status: "OK",
-        message: "Server is running and healthy : Blog MERN Backend",
+        message: "Server is running and healthy : Blog MERN Backend : 12th June 2024",
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });
